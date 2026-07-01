@@ -19,47 +19,41 @@
             android:id="@+id/terminal_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text=""
             android:textColor="#00FFCC" />
     </ScrollView>
 
-    <!-- Panel Pengendali Tombol -->
+    <!-- Panel Input Terminal Interaktif -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:orientation="horizontal">
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:background="#12121A"
+        android:padding="4dp">
 
-        <Button
-            android:id="@+id/btn_terminal_inject"
+        <EditText
+            android:id="@+id/terminal_input"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginRight="4dp"
-            android:backgroundTint="#7C6FF7"
-            android:text="INJECT COOKIE"
+            android:background="@android:color/transparent"
+            android:fontFamily="monospace"
+            android:hint="Ketik perintah..."
+            android:inputType="text"
+            android:maxLines="1"
+            android:padding="10dp"
             android:textColor="#FFFFFF"
-            android:textSize="11sp" />
+            android:textColorHint="#505070"
+            android:textSize="13sp" />
 
         <Button
-            android:id="@+id/btn_terminal_start"
-            android:layout_width="0dp"
+            android:id="@+id/btn_terminal_enter"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginRight="4dp"
-            android:backgroundTint="#4ADE80"
-            android:text="START"
+            android:backgroundTint="#00FFCC"
+            android:text="ENTER"
             android:textColor="#000000"
-            android:textSize="11sp" />
-
-        <Button
-            android:id="@+id/btn_terminal_stop"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:backgroundTint="#F87171"
-            android:text="STOP"
-            android:textColor="#FFFFFF"
-            android:textSize="11sp" />
+            android:textSize="12sp"
+            android:textStyle="bold" />
     </LinearLayout>
 </LinearLayout>
