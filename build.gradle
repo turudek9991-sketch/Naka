@@ -9,7 +9,7 @@ android {
     defaultConfig {
         applicationId "com.dhub"
         minSdk 21
-        targetSdk 34
+        targetSdk 29 // Paksa target ke Android 10 agar bypass batasan privasi Android 11+
         versionCode 1
         versionName "2.0.0"
     }
