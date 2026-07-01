@@ -1,31 +1,4 @@
+// Top-level build file di mana Anda dapat menambahkan opsi konfigurasi global ke semua subproyek/modul.
 plugins {
-    id 'com.android.application' version '8.2.2'
-}
-
-android {
-    namespace 'com.dhub'
-    compileSdk 34
-
-    defaultConfig {
-        applicationId "com.dhub"
-        minSdk 21
-        targetSdk 29 // Paksa target ke Android 10 agar bypass batasan privasi Android 11+
-        versionCode 1
-        versionName "2.0.0"
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-        }
-    }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
-    }
-}
-
-dependencies {
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.11.0'
+    id 'com.android.application' version '8.2.2' apply false
 }
