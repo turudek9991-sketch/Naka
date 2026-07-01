@@ -43,8 +43,7 @@ public class MainActivity extends AppCompatActivity {
     
     private Runnable monitorRunnable;
 
-    // State Machine untuk input interaktif terminal
-    private int currentMenuMode = 0; // 0 = Main Menu, 1 = Cookie Input Mode, 2 = Setting Job ID, 3 = Setting Delay
+    private int currentMenuMode = 0; 
     private int cookieInputIndex = 0;
 
     @Override
@@ -80,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
         printLn(" | |_| |  _  | |_| | |_) | | |___| |___ I", "#00FFCC");
         printLn(" |____/|_| |_|\\___/|____/   \\____|_____|I", "#00FFCC");
         printLn("=======================================", "#00FFCC");
-        printLn("VERSION v3.0.0 · INTERACTIVE CONSOLE", "#7070A0");
+        printLn("VERSION v3.1.0 · HYBRID INJECTOR", "#7070A0");
         printLn("Status Monitor: " + (isMonitoring ? "RUNNING" : "STOPPED"), isMonitoring ? "#4ADE80" : "#F87171");
         printLn("---------------------------------------", "#7070A0");
         printLn("Select Menu Options:", "#FFFF00");
@@ -94,10 +93,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void handleTerminalInput() {
         String input = terminalInput.getText().toString().trim();
-        terminalInput.setText(""); // Bersihkan input setelah enter
+        terminalInput.setText(""); 
         
         if (currentMenuMode == 0) {
-            // Logika Menu Utama
             switch (input) {
                 case "1":
                     startAutomationLog();
@@ -113,17 +111,14 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
         } else if (currentMenuMode == 1) {
-            // Wizard Input Cookie
             handleCookieWizardInput(input);
         } else if (currentMenuMode == 2) {
-            // Input Job ID / Place ID
             prefs.saveJobId(input);
             printLn("[✓] Target ID disimpan: " + input, "#4ADE80");
             currentMenuMode = 3;
             printLn("\n[>] Masukkan Delay Rejoin (Detik) [Default 7]:", "#FFFF00");
             terminalInput.setHint("Contoh: 7");
         } else if (currentMenuMode == 3) {
-            // Input Delay Time
             try {
                 int delay = Integer.parseInt(input);
                 prefs.saveJedaCek(delay);
@@ -137,43 +132,36 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // ========================================================================
-    // WIZARD SET COOKIE (MENU 2)
-    // ========================================================================
     private void startCookieWizard() {
         if (profiles.isEmpty()) {
-            printLn("[!] Tidak ada aplikasi Roblox terdeteksi untuk disetel!", "#F87171");
+            printLn("[!] Tidak ada aplikasi Roblox terdeteksi!", "#F87171");
             return;
         }
         currentMenuMode = 1;
         cookieInputIndex = 0;
         terminalBuilder.clear();
         printLn("=======================================", "#7C6FF7");
-        printLn("      COOKIE CONFIGURATION WIZARD      ", "#FFFFFF");
+        printLn("      HYBRID COOKIE INJECTION WORKER    ", "#FFFFFF");
         printLn("=======================================", "#7C6FF7");
         askForCookieAtIndex();
     }
 
     private void askForCookieAtIndex() {
         if (cookieInputIndex >= profiles.size()) {
-            // Selesai input semua aplikasi
             prefs.saveProfiles(profiles);
-            printLn("\n[✓] Semua cookie berhasil direkam di memori internal!", "#4ADE80");
-            printLn("[*] Memulai proses injeksi massal ke sistem root WebView...", "#FFFF00");
+            printLn("\n[✓] Semua cookie tersimpan di memori lokal.", "#4ADE80");
+            printLn("[*] Menjalankan Injeksi Multi-Metode (Root)...", "#FFFF00");
             runMassCookieInjection();
             return;
         }
 
         ProfileModel currentProfile = profiles.get(cookieInputIndex);
         printLn("\n(" + (cookieInputIndex + 1) + "/" + profiles.size() + ") Target App: " + currentProfile.packageName, "#00FFCC");
-        printLn("Silakan Tempel (Paste) Cookie .ROBLOSECURITY kamu di bawah, lalu tekan ENTER:", "#E8E8F0");
+        printLn("Masukkan Cookie .ROBLOSECURITY, lalu tekan ENTER:", "#E8E8F0");
         terminalInput.setHint("Paste cookie di sini...");
     }
 
     private void handleCookieWizardInput(String input) {
-        if (input.isEmpty()) {
-            printLn("[~] Cookie dikosongkan untuk package ini.", "#7070A0");
-        }
         profiles.get(cookieInputIndex).cookie = input;
         cookieInputIndex++;
         askForCookieAtIndex();
@@ -184,16 +172,15 @@ public class MainActivity extends AppCompatActivity {
             for (ProfileModel p : profiles) {
                 if (p.cookie.isEmpty()) continue;
                 
-                runOnUiThread(() -> printLn("[>] Syncing database WebView untuk: " + p.packageName, "#FFFF00"));
-                executeShellCommand("am start -n " + p.packageName + "/com.roblox.client.Activity");
-                try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
+                runOnUiThread(() -> printLn("[>] Menyiapkan penutupan paksa: " + p.packageName, "#FFFF00"));
                 executeShellCommand("am force-stop " + p.packageName);
-                try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+                try { Thread.sleep(800); } catch (InterruptedException ignored) {}
 
                 String escapedCookie = p.cookie.replace("'", "''");
                 long currentMicros = System.currentTimeMillis() * 1000;
                 long expiryMicros = currentMicros + (365L * 24 * 60 * 60 * 1000 * 1000);
                 
+                // METODE 1: SQLITE3 ENGINE (Utama)
                 String sql = "PRAGMA journal_mode=DELETE; DELETE FROM cookies WHERE name='.ROBLOSECURITY'; " +
                              "INSERT OR REPLACE INTO cookies (creation_utc, host_key, name, value, path, expires_utc, is_secure, is_httponly, last_access_utc, has_expires, is_persistent, priority, samesite, source_scheme, source_port) " +
                              "VALUES (" + currentMicros + ", '.roblox.com', '.ROBLOSECURITY', '" + escapedCookie + "', '/', " + expiryMicros + ", 1, 1, " + currentMicros + ", 1, 1, 1, -1, 2, 443);";
@@ -201,35 +188,44 @@ public class MainActivity extends AppCompatActivity {
                 String dbPath1 = "/data/data/" + p.packageName + "/app_webview/Default/Cookies";
                 String dbPath2 = "/data/data/" + p.packageName + "/app_webview/Cookies";
                 
+                // METODE 2: DIRECT XML INJECTION (Cadangan jika sqlite3 tidak terpasang di Cloud Phone)
+                String xmlContent = "<?xml version='1.0' encoding='utf-8' standalone='yes'?>\\n<map>\\n    <string name=\\\".ROBLOSECURITY\\\"></string>\\n</map>";
+                String xmlPath = "/data/data/" + p.packageName + "/shared_prefs/com.roblox.client.X.xml";
+
                 String cmd = "setenforce 0\n" +
+                             "chmod -R 777 /data/data/" + p.packageName + "\n" +
                              "DB=\"" + dbPath1 + "\"\n" +
                              "[ ! -f \"$DB\" ] && DB=\"" + dbPath2 + "\"\n" +
-                             "[ -f \"$DB-wal\" ] && true > \"$DB-wal\"\n" +
-                             "[ -f \"$DB-shm\" ] && true > \"$DB-shm\"\n" +
-                             "sqlite3 \"$DB\" \"" + sql + "\"\n" +
-                             "chmod 660 \"$DB\"\n" +
-                             "chown $(stat -c '%u:%g' /data/data/" + p.packageName + ") \"$DB\"\n" +
+                             "if [ -f \"$DB\" ] && command -v sqlite3 >/dev/null 2>&1; then\n" +
+                             "  sqlite3 \"$DB\" \"" + sql + "\"\n" +
+                             "  echo \"SQLITE_SUCCESS\"\n" +
+                             "else\n" +
+                             "  mkdir -p /data/data/" + p.packageName + "/shared_prefs\n" +
+                             "  echo -e \"" + xmlContent + "\" > " + xmlPath + "\n" +
+                             "  sed -i 's|<string name=\".ROBLOSECURITY\"></string>|<string name=\".ROBLOSECURITY\">" + escapedCookie + "</string>|g' " + xmlPath + "\n" +
+                             "  echo \"XML_SUCCESS\"\n" +
+                             "fi\n" +
+                             "chown -R $(stat -c '%u:%g' /data/data/" + p.packageName + ") /data/data/" + p.packageName + "\n" +
                              "setenforce 1";
                              
-                boolean success = executeShellCommand(cmd);
+                String output = executeShellCommandWithOutput(cmd);
                 runOnUiThread(() -> {
-                    if (success) {
-                        printLn("[✓] Success injected -> " + p.packageName, "#4ADE80");
+                    if (output.contains("SQLITE_SUCCESS")) {
+                        printLn("[✓] Injeksi Berhasil (Metode: SQLite3 DB) -> " + p.packageName, "#4ADE80");
+                    } else if (output.contains("XML_SUCCESS")) {
+                        printLn("[✓] Injeksi Berhasil (Metode: SharedPrefs XML) -> " + p.packageName, "#4ADE80");
                     } else {
-                        printLn("[✗] Failed injected -> " + p.packageName, "#F87171");
+                        printLn("[✗] Gagal! Pastikan popup izin ROOT/SU sudah diizinkan di emulator -> " + p.packageName, "#F87171");
                     }
                 });
             }
             runOnUiThread(() -> {
-                printLn("\n[✓] PROSES SELESAI. Tekan ENTER untuk kembali ke menu utama.", "#00FFCC");
+                printLn("\n[✓] SELESAI. Tekan ENTER untuk kembali ke menu.", "#00FFCC");
                 currentMenuMode = 0;
             });
         }).start();
     }
 
-    // ========================================================================
-    // WIZARD CONFIG SETTINGS (MENU 3)
-    // ========================================================================
     private void startSettingsWizard() {
         terminalBuilder.clear();
         printLn("=======================================", "#FFFF00");
@@ -243,12 +239,8 @@ public class MainActivity extends AppCompatActivity {
         currentMenuMode = 2;
     }
 
-    // ========================================================================
-    // AUTO REJOIN CORE ENGINE (MENU 1)
-    // ========================================================================
     private void startAutomationLog() {
         if (isMonitoring) {
-            // Jika ditekan lagi saat running, bertindak sebagai tombol STOP
             stopAutomationLog();
             return;
         }
@@ -269,12 +261,11 @@ public class MainActivity extends AppCompatActivity {
                     for (ProfileModel p : profiles) {
                         boolean running = isAppRunning(p.packageName);
                         if (!running) {
-                            runOnUiThread(() -> printLn("[" + timeFormat.format(new Date()) + "] ⚠ App disconnect/crash detected: " + p.packageName, "#F87171"));
+                            runOnUiThread(() -> printLn("[" + timeFormat.format(new Date()) + "] ⚠ App crash/disconnect: " + p.packageName, "#F87171"));
                             
                             executeShellCommand("am force-stop " + p.packageName);
                             try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
                             
-                            // Pemicu Rejoin otomatis menggunakan skema link permainan (jika dikonfigurasi)
                             Intent intent;
                             if (!prefs.getJobId().isEmpty()) {
                                 intent = new Intent(Intent.ACTION_VIEW, Uri.parse(prefs.getJobId()));
@@ -298,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         mainHandler.post(monitorRunnable);
-        terminalInput.setHint("Ketik apa saja lalu enter untuk ke menu...");
+        terminalInput.setHint("Ketik perintah...");
     }
 
     private void stopAutomationLog() {
@@ -312,9 +303,6 @@ public class MainActivity extends AppCompatActivity {
         printMainMenu();
     }
 
-    // ========================================================================
-    // HELPER UTILITIES
-    // ========================================================================
     private void autoDetectRobloxClones() {
         List<String> detected = new ArrayList<>();
         PackageManager pm = getPackageManager();
@@ -384,6 +372,28 @@ public class MainActivity extends AppCompatActivity {
         } finally {
             try { if (os != null) os.close(); if (process != null) process.destroy(); } catch (Exception ignored) {}
         }
+    }
+
+    private String executeShellCommandWithOutput(String command) {
+        StringBuilder output = new StringBuilder();
+        try {
+            Process process = Runtime.getRuntime().exec("su");
+            DataOutputStream os = new DataOutputStream(process.getOutputStream());
+            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(process.getInputStream()));
+            
+            os.writeBytes(command + "\n");
+            os.writeBytes("exit\n");
+            os.flush();
+            
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append("\n");
+            }
+            process.waitFor();
+        } catch (Exception e) {
+            return "ERROR";
+        }
+        return output.toString();
     }
 
     private boolean isAppRunning(String packageName) {
