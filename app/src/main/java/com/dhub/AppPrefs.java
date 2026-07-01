@@ -38,11 +38,19 @@ public class AppPrefs {
         editor.apply();
     }
 
-    public int getJedaCek() {
-        return sharedPrefs.getInt("jeda_cek", 10);
+    public void saveJedaCek(int delaySeconds) {
+        sharedPrefs.edit().putInt("jeda_cek", delaySeconds).apply();
     }
 
-    public int getJedaProfil() {
-        return sharedPrefs.getInt("jeda_profil", 5);
+    public int getJedaCek() {
+        return sharedPrefs.getInt("jeda_cek", 7); // Default diubah menjadi 7 detik sesuai instruksi
+    }
+
+    public void saveJobId(String jobId) {
+        sharedPrefs.edit().putString("saved_job_id", jobId).apply();
+    }
+
+    public String getJobId() {
+        return sharedPrefs.getString("saved_job_id", "");
     }
 }
