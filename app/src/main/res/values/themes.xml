@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.DHubTerminal" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">#0A0A0F</item>
+        <item name="colorPrimaryDark">#020205</item>
+        <item name="colorAccent">#00FFCC</item>
+    </style>
+</resources>
