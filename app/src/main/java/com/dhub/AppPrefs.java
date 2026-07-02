@@ -19,8 +19,9 @@ public class AppPrefs {
         Set<String> pkgs = sharedPrefs.getStringSet("saved_packages", new HashSet<>());
         for (String pkg : pkgs) {
             ProfileModel p = new ProfileModel(pkg);
-            p.cookie = sharedPrefs.getString("cookie_" + pkg, "");
-            p.link = sharedPrefs.getString("link_" + pkg, "");
+            p.rawInput = sharedPrefs.getString("raw_" + pkg, "");
+            p.accountName = sharedPrefs.getString("name_" + pkg, "Unknown Account");
+            p.cookieOnly = sharedPrefs.getString("cookie_" + pkg, "");
             list.add(p);
         }
         return list;
@@ -31,8 +32,9 @@ public class AppPrefs {
         Set<String> pkgs = new HashSet<>();
         for (ProfileModel p : list) {
             pkgs.add(p.packageName);
-            editor.putString("cookie_" + p.packageName, p.cookie);
-            editor.putString("link_" + p.packageName, p.link);
+            editor.putString("raw_" + p.packageName, p.rawInput);
+            editor.putString("name_" + p.packageName, p.accountName);
+            editor.putString("cookie_" + p.packageName, p.cookieOnly);
         }
         editor.putStringSet("saved_packages", pkgs);
         editor.apply();
@@ -43,7 +45,7 @@ public class AppPrefs {
     }
 
     public int getJedaCek() {
-        return sharedPrefs.getInt("jeda_cek", 7); // Default diubah menjadi 7 detik sesuai instruksi
+        return sharedPrefs.getInt("jeda_cek", 7);
     }
 
     public void saveJobId(String jobId) {
