@@ -2,14 +2,16 @@ package com.dhub;
 
 public class ProfileModel {
     public String packageName;
-    public String cookie;
-    public String link;
+    public String accountName;
+    public String rawInput; // Menyimpan format string gabungan
+    public String cookieOnly;
     public String status;
 
     public ProfileModel(String packageName) {
         this.packageName = packageName;
-        this.cookie = "";
-        this.link = "";
+        this.accountName = "Unknown Account";
+        this.rawInput = "";
+        this.cookieOnly = "";
         this.status = "OFFLINE";
     }
 }
