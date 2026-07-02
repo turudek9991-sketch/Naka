@@ -14,7 +14,9 @@ import android.graphics.PixelFormat;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;  // <-- TAMBAHKAN INI
 import android.os.IBinder;
+import android.os.Looper;   // <-- TAMBAHKAN INI
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.view.Gravity;
@@ -24,7 +26,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import androidx.core.app.NotificationCompat;
