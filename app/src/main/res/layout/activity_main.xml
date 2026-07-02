@@ -4,16 +4,15 @@
     android:layout_height="match_parent"
     android:background="#0A0A0F"
     android:orientation="vertical"
-    android:padding="12dp">
+    android:padding="6dp">
 
-    <!-- Screen Scroll Konsol Terminal -->
     <ScrollView
         android:id="@+id/terminal_scroll"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:background="#020205"
-        android:padding="8dp">
+        android:padding="4dp">
 
         <TextView
             android:id="@+id/terminal_text"
@@ -22,14 +21,13 @@
             android:textColor="#00FFCC" />
     </ScrollView>
 
-    <!-- Panel Input Terminal Interaktif -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="6dp"
         android:orientation="horizontal"
         android:background="#12121A"
-        android:padding="4dp">
+        android:padding="2dp">
 
         <EditText
             android:id="@+id/terminal_input"
@@ -38,22 +36,22 @@
             android:layout_weight="1"
             android:background="@android:color/transparent"
             android:fontFamily="monospace"
-            android:hint="Ketik perintah..."
+            android:hint="Ketik..."
             android:inputType="text"
             android:maxLines="1"
-            android:padding="10dp"
+            android:padding="8dp"
             android:textColor="#FFFFFF"
             android:textColorHint="#505070"
-            android:textSize="13sp" />
+            android:textSize="12sp" />
 
         <Button
             android:id="@+id/btn_terminal_enter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:backgroundTint="#00FFCC"
-            android:text="ENTER"
+            android:text="EXE"
             android:textColor="#000000"
-            android:textSize="12sp"
+            android:textSize="11sp"
             android:textStyle="bold" />
     </LinearLayout>
 </LinearLayout>
