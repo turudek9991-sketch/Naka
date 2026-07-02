@@ -3,7 +3,7 @@ package com.dhub;
 public class ProfileModel {
     public String packageName;
     public String accountName;
-    public String rawInput; // Menyimpan format string gabungan
+    public String rawInput;
     public String cookieOnly;
     public String status;
 
