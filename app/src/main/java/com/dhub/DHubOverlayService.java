@@ -51,6 +51,7 @@ public class DHubOverlayService extends Service {
     private boolean isMonitoring = false;
     private Thread automationThread;
     private SpannableStringBuilder logBuilder = new SpannableStringBuilder();
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     private int currentMenu = 0; // 0=Main, 1=Cookie Wizard, 2=Setting Job, 3=Setting Delay, 4=Performance, 5=Delta Executor
     private int wizardIndex = 0;
@@ -89,7 +90,7 @@ public class DHubOverlayService extends Service {
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY : WindowManager.LayoutParams.TYPE_PHONE;
 
         params = new WindowManager.LayoutParams(
-                700, // Lebar kompak agar mengambang rapi di sisi kiri layar
+                700, 
                 WindowManager.LayoutParams.MATCH_PARENT,
                 layoutType,
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
@@ -102,7 +103,6 @@ public class DHubOverlayService extends Service {
 
         windowManager.addView(overlayView, params);
 
-        // Bind Komponen UI Layout
         txtTerminal = overlayView.findViewById(R.id.terminal_text);
         scrollTerminal = overlayView.findViewById(R.id.terminal_scroll);
         inputCommand = overlayView.findViewById(R.id.terminal_input);
@@ -111,7 +111,6 @@ public class DHubOverlayService extends Service {
         txtTerminal.setTypeface(Typeface.MONOSPACE);
         txtTerminal.setTextSize(11);
 
-        // Fitur Drag & Move Panel Mengambang pada Area Header Terminal
         txtTerminal.setOnTouchListener(new View.OnTouchListener() {
             private int initialX, initialY;
             private float initialTouchX, initialTouchY;
@@ -192,9 +191,6 @@ public class DHubOverlayService extends Service {
         }
     }
 
-    // ========================================================================
-    // FITUR AUTO GRID POSITIONING MECHANISM
-    // ========================================================================
     private void triggerAutoGridAlignment() {
         printLn("[*] Re-calculating Window Boundaries for Auto-Grid Alignment...", "#FFFF00");
         new Thread(() -> {
@@ -211,11 +207,9 @@ public class DHubOverlayService extends Service {
                 return;
             }
 
-            // Total area layar dikurangi area DHub di sisi kiri (700px)
-            // Menggunakan koordinat mutlak wm shell untuk membagi grid secara presisi
-            int displayWidth = 1920;  // Standar resolusi layar Cloud Phone horizontal
+            int displayWidth = 1920;  
             int displayHeight = 1080;
-            int startXPosition = 710; // Geser setelah koordinat panel DHub agar tidak tumpang tindih
+            int startXPosition = 710; 
             int availableWidth = displayWidth - startXPosition;
 
             int columns = (totalApps <= 2) ? 1 : (totalApps <= 4) ? 2 : 3;
@@ -232,7 +226,6 @@ public class DHubOverlayService extends Service {
                 int x = startXPosition + (col * cellWidth);
                 int y = row * cellHeight;
 
-                // Memaksa penataan batas ukuran aktivitas via Shell Root Server
                 String cmd = "wm set-user-rotation 1\n" + 
                              "am stack resize-docked-stack " + x + " " + y + " " + (x + cellWidth) + " " + (y + cellHeight);
                 executeShell(cmd);
@@ -242,9 +235,6 @@ public class DHubOverlayService extends Service {
         returnToMainMenuDelayed();
     }
 
-    // ========================================================================
-    // HYBRID COOKE INJECTOR REAL IMPLEMENTATION
-    // ========================================================================
     private void startCookieWizard() {
         if (profiles.isEmpty()) {
             printLn("[!] No Roblox clones located.", "#F87171");
@@ -277,7 +267,6 @@ public class DHubOverlayService extends Service {
                 ProfileModel p = profiles.get(wizardIndex);
                 p.rawInput = input;
                 p.accountName = parts[0];
-                // Ekstraksi nilai cookie token .ROBLOSECURITY murni
                 StringBuilder token = new StringBuilder();
                 for (int i = 2; i < parts.length; i++) {
                     token.append(parts[i]).append(i == parts.length - 1 ? "" : ":");
@@ -286,7 +275,7 @@ public class DHubOverlayService extends Service {
                 printLn("[+] Parsed account user: " + p.accountName, "#4ADE80");
             }
         } else {
-            profiles.get(wizardIndex).cookieOnly = input; // Fallback jika hanya menginput cookie murni
+            profiles.get(wizardIndex).cookieOnly = input; 
         }
         wizardIndex++;
         askNextAccountCookie();
@@ -294,7 +283,6 @@ public class DHubOverlayService extends Service {
 
     private void executeMassHybridInjection() {
         new Thread(() -> {
-            // Mencari biner sqlite3 absolut milik Termux jika folder internal sistem kosong
             String termuxSqlitePath = "/data/data/com.termux/files/usr/bin/sqlite3";
             String sqliteBinary = new File(termuxSqlitePath).exists() ? termuxSqlitePath : "sqlite3";
 
@@ -330,7 +318,6 @@ public class DHubOverlayService extends Service {
                 if (res.contains("INJECT_DB_OK")) {
                     runOnUiThread(() -> printLn("[✓] Injected successfully (SQLite) -> " + p.packageName, "#4ADE80"));
                 } else {
-                    // Fallback Metode XML Direct Patching jika berkas database belum terbuat oleh mesin game
                     String xmlPath = "/data/data/" + p.packageName + "/shared_prefs/com.roblox.client.X.xml";
                     String xmlScript = "mkdir -p /data/data/" + p.packageName + "/shared_prefs\n" +
                             "echo -e \"<?xml version='1.0' encoding='utf-8' standalone='yes'?>\\n<map>\\n<string name=\\\".ROBLOSECURITY\\\"></string>\\n</map>\" > " + xmlPath + "\n" +
@@ -344,9 +331,17 @@ public class DHubOverlayService extends Service {
         }).start();
     }
 
-    // ========================================================================
-    // PERFORMANCE BOOSTER IMPLEMENTATION OPERATIONAL
-    // ========================================================================
+    private void startSettingsWizard() {
+        currentMenu = 2;
+        logBuilder.clear();
+        printLn("===== GLOBAL SETTINGS =====", "#FFFF00");
+        printLn("[Current Target ID]: " + prefs.getJobId(), "#E8E8F0");
+        printLn("[Current Delay]: " + prefs.getJedaCek() + " Detik", "#E8E8F0");
+        printLn("---------------------------", "#7070A0");
+        printLn("[>] Masukkan Place ID atau Link/Job ID baru:", "#FFFF00");
+        inputCommand.setHint("Masukkan Link / Place ID...");
+    }
+
     private void showPerformanceMenu() {
         currentMenu = 4;
         logBuilder.clear();
@@ -386,9 +381,6 @@ public class DHubOverlayService extends Service {
         }).start();
     }
 
-    // ========================================================================
-    // DELTA EXECUTOR AUTOMATIC EXECUTE MANAGEMENT
-    // ========================================================================
     private void showDeltaManagerMenu() {
         currentMenu = 5;
         logBuilder.clear();
@@ -410,7 +402,6 @@ public class DHubOverlayService extends Service {
         String luaScript = parts[1];
 
         new Thread(() -> {
-            // Target jalur direktori penyimpanan folder Autoexecute milik Delta
             File deltaDir = new File("/storage/emulated/0/Delta/Autoexecute");
             if (!deltaDir.exists()) deltaDir.mkdirs();
 
@@ -428,9 +419,6 @@ public class DHubOverlayService extends Service {
         }).start();
     }
 
-    // ========================================================================
-    // CRASH DETECTOR & AUTOMATIC REJOIN DAEMON CORE ENGINE
-    // ========================================================================
     private void toggleAutomationLog() {
         if (isMonitoring) {
             isMonitoring = false;
@@ -475,7 +463,7 @@ public class DHubOverlayService extends Service {
                                 startActivity(intent);
                                 runOnUiThread(() -> printLn("[✓] Worker initialized container for: " + p.packageName, "#4ADE80"));
                             }
-                            Thread.sleep(5000); // Penjagaan cooldown antar instance agar tidak overload CPU
+                            Thread.sleep(5000); 
                         }
                     }
                     runOnUiThread(() -> renderStatusTable());
@@ -501,9 +489,6 @@ public class DHubOverlayService extends Service {
         printLn("+-----------------------------------+---------+", "#00FFCC");
     }
 
-    // ========================================================================
-    // SHELL KERNEL INTERACTION EXECUTIVE PIPES
-    // ========================================================================
     private void executeShell(String cmd) {
         try {
             Process p = Runtime.getRuntime().exec("su");
